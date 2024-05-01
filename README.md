@@ -1,4 +1,7 @@
 # Text-Based Database Simulation for Java
+
+## Version 1.0.0
+
 This project simulates a basic database system in Java using text-based commands. Keep in mind that this is a simplified version compared to an actual database, and the SQL query handling is sensitive to formatting. Do not use next lines too, all query should be on the same line.
 ## Method: sql
     - The only method available is sql.
