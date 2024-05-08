@@ -8,7 +8,8 @@ This project simulates a basic database system in Java using text-based commands
     - To use it, call database.sql(Query).
 ## Supported Queries
 ### Creating a New Table
-``` CREATE TABLE table_name (
+``` 
+    CREATE TABLE table_name (
     column_name1 data_type1 {optional arguments},
     column_name2 data_type2 {optional arguments},
     ...
@@ -18,7 +19,8 @@ This project simulates a basic database system in Java using text-based commands
 - Specify column names, data types, and any optional arguments (e.g., NOT NULL, PRIMARY KEY, FOREIGN KEY).
 
 ### Adding Data into a Table
-```INSERT INTO table_name (column_name1, column_name2, ...) VALUES
+```
+    INSERT INTO table_name (column_name1, column_name2, ...) VALUES
     (value1, value2, ...),
     (value3, value4, ...),
     ...
@@ -28,10 +30,11 @@ This project simulates a basic database system in Java using text-based commands
 - List the column names and corresponding values for each row.
   
 ### Retrieving Data from a Table
-```SELECT column_name1, column_name2, ...
-FROM table_name
-WHERE column_name2 = value AND/OR column_name2 = value
-ORDER BY column_name ASC/DSC;
+```
+    SELECT column_name1, column_name2, ...
+    FROM table_name
+    WHERE column_name2 = value AND/OR column_name2 = value
+    ORDER BY column_name ASC/DSC;
 ```
 - Replace table_name with the desired table.
 - Specify the columns you want to retrieve.
@@ -39,17 +42,19 @@ ORDER BY column_name ASC/DSC;
 - Use ORDER BY to sort the results (ascending ASC or descending DSC).
 
 ### Updating Data in a Table
-```UPDATE table_name
-SET column_name1 = value, column_names2 = value ...
-WHERE column_name3 = value AND/OR column_name4 = value ...
+```
+    UPDATE table_name
+    SET column_name1 = value, column_names2 = value ...
+    WHERE column_name3 = value AND/OR column_name4 = value ...
 ```
 - Replace table_name with the desired table.
 - Specify the columns you want to update.
 - Specify conditions for the columns you want to update. (Conditions: =, >, <, !=, >=, <=)
 
 ### Delete Data in a Table
-```DELETE FROM table_name
-WHERE column_name1 = value AND/OR column_name2 = value
+```
+    DELETE FROM table_name
+    WHERE column_name1 = value AND/OR column_name2 = value
 ```
 - Replace table_name with the desired table.
 - Specify conditions for the columns you want to delete. (Conditions: =, >, <, !=, >=, <=)
