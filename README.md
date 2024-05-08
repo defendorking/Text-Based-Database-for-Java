@@ -40,7 +40,7 @@ Problems:
 ### Retrieving Data from a Table
 ```
     SELECT column_name1, column_name2, ...
-    FROM table_name
+    FROM table_name (Currently limited to 1 table)
     WHERE column_name2 = value AND/OR column_name2 = value
     ORDER BY column_name ASC/DSC;
 ```
