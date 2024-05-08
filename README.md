@@ -40,12 +40,12 @@ Problems:
 ### Retrieving Data from a Table
 ```
     SELECT column_name1, column_name2, ...
-    FROM table_name (Currently limited to 1 table)
+    FROM table_name
     WHERE column_name2 = value AND/OR column_name2 = value
     ORDER BY column_name ASC/DSC;
 ```
 - Replace table_name with the desired table.
-- Specify the columns you want to retrieve.
+- Specify the columns you want to retrieve. (Currently limited to 1 table)
 - Optionally, use WHERE to filter results based on a condition. (Filters: =, >, <, !=, >=, <=)
 - Use ORDER BY to sort the results (ascending ASC or descending DSC).
 
