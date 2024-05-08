@@ -5,9 +5,11 @@
 This project simulates a basic database system in Java using text-based commands. Keep in mind that this is a simplified version compared to an actual database, and the SQL query handling is sensitive to formatting. Do not use next lines too, all query should be on the same line.
 
 Problems:
+```
 -Primary Keys and Foreign Keys have limited functions
 -Primary Key only function to ensure input values to be unique
 -Queries are very case and space sensitive
+```
 
 ## Method: sql
     - The only method available is sql.
