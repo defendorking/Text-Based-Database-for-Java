@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.Scanner;
 import java.util.ArrayList;
 
+// Version 1.0.2
+
 public class database {
 
     // Methods
@@ -25,7 +27,7 @@ public class database {
         try {
             int i = Integer.valueOf(strNum);
         } catch (NumberFormatException e) {
-            database.log("Error: NumberFormatException (line 28)");
+            database.log("Error: NumberFormatException (line 29)");
             return false;
         }
         database.log("Output: Returned true");
@@ -42,7 +44,7 @@ public class database {
         try {
             double d = Double.parseDouble(strNum);
         } catch (NumberFormatException e) {
-            database.log("Error: NumberFormatException (line 45)");
+            database.log("Error: NumberFormatException (line 46)");
             return false;
         }
         database.log("Output: Returned true");
@@ -157,7 +159,6 @@ public class database {
             String dataType = "";
             String notNull = "";
             String key = "";
-
             // Get inividual column names
             String[] columns = cmd.split(", ");
             for (int i = 0; i < columns.length; ++i) {
@@ -169,13 +170,12 @@ public class database {
                 } else {
                     colName = colName + temp[0] + ",";
                 }
-
                 // Check for valid datatypes for each column
                 String[] dataTypes = { "int", "str", "double", "bit", "date" };
                 if (Arrays.asList(dataTypes).contains(temp[1])) {
                     dataType = dataType + temp[1] + ",";
                 } else {
-                    database.log("Input Error: Invalid datatype (line 178)");
+                    database.log("Input Error: Invalid datatype (line 177)");
                     System.out.println(String.format("%s is not a valid datatype.", temp[1]));
                     return;
                 }
@@ -186,7 +186,6 @@ public class database {
                 } else {
                     notNull = notNull + "NO,";
                 }
-
                 // Check for PK and FK
                 if (columns[i].contains("PRIMARY KEY")) {
                     key = key + "PK,";
@@ -196,7 +195,7 @@ public class database {
                     if (f.exists() && !f.isDirectory()) {
                         key = key + "FK(" + FKName + "),";
                     } else {
-                        database.log("Input Error: Invalid FK (line 199)");
+                        database.log("Input Error: Invalid FK (line 197)");
                         System.out.println(String.format("Invalid Foreign Key. The table %s does not exist.", FKName));
                         return;
                     }
@@ -204,14 +203,13 @@ public class database {
                     key = key + "NO,";
                 }
             }
-
             // Creating new files for the table
             name = name + ".txt";
             File createFile = new File(name);
             if (createFile.createNewFile()) {
                 System.out.println("Table created: " + createFile.getName());
             } else {
-                database.log("Input Error: Table already exist (line 214)");
+                database.log("Input Error: Table already exist (line 211)");
                 System.out.println("The table already exists.");
             }
 
@@ -220,7 +218,7 @@ public class database {
             writer.close();
 
         } catch (IOException e) {
-            database.log("Error: IOException (line 223)");
+            database.log("Error: IOException (line 220)");
             System.out.println("An unexpected error occured.");
             e.printStackTrace();
         }
@@ -235,7 +233,7 @@ public class database {
         if (cmd.contains("values")) {
             values = cmd.substring(cmd.indexOf("values") + 7, cmd.length() - 1).split("\\),\\(");
         } else {
-            database.log("Input Error: Invalid command (line 238)");
+            database.log("Input Error: Invalid command (line 235)");
             System.out.println("Invalid command.");
             return;
         }
@@ -249,7 +247,7 @@ public class database {
             }
             tableRawData.close();
         } catch (FileNotFoundException e) {
-            database.log("Input Error: Table does not exist (line 252)");
+            database.log("Input Error: Table does not exist (line 249)");
             System.out.println("The table does not exist");
             e.printStackTrace();
             return;
@@ -259,10 +257,19 @@ public class database {
         String[] notNull = tableData.get(2).split(",");
         String[] key = tableData.get(3).split(",");
         String[] arrangedValue = new String[colName.length];
+        ArrayList<String> colNameArrList = new ArrayList<String>();
+        for (int i = 0; i < colName.length; ++i) {
+            colNameArrList.add(colName[i]);
+        }
         for (int i = 0; i < values.length; ++i) {
             String[] readValue = values[i].split(",");
             for (int k = 0; k < columns.length; ++k) {
-                int posValue = Arrays.binarySearch(colName, columns[k]);
+                int posValue = colNameArrList.indexOf(columns[k]);
+                if (posValue == -1) {
+                    database.log("Input Error: Invalid column name (line 268)");
+                    System.out.println("Invalid column name");
+                    return;
+                }
                 if (dataType[posValue].equals("str") && Character.toString(readValue[k].charAt(0)).equals("'")
                         && Character.toString(readValue[k].charAt(readValue[k].length() - 1)).equals("'")) {
                     arrangedValue[posValue] = readValue[k].substring(1, readValue[k].length() - 1);
@@ -273,14 +280,14 @@ public class database {
                 } else if (dataType[posValue].equals("bit") && (readValue[k].equals("0") || readValue[k].equals("1"))) {
                     arrangedValue[posValue] = readValue[k];
                 } else {
-                    database.log("Input Error: Invalid datatype (line 276)");
+                    database.log("Input Error: Invalid datatype (line 282)");
                     System.out.println("Invalid datatype");
                     return;
                 }
             }
             for (int k = 0; k < arrangedValue.length; ++k) {
                 if (arrangedValue[k] == null && notNull[k].equals("Yes")) {
-                    database.log("Input Error: Null value in non null column (line 283)");
+                    database.log("Input Error: Null value in non null column (line 289)");
                     System.out.println("Null value in non null column");
                     return;
                 }
@@ -302,7 +309,7 @@ public class database {
             }
             output.close();
         } catch (IOException e) {
-            database.log("Error: IOException (line 305)");
+            database.log("Error: IOException (line 311)");
             System.out.println("An unexpected error occured.");
             e.printStackTrace();
         }
@@ -324,7 +331,7 @@ public class database {
             }
             tableRawData.close();
         } catch (FileNotFoundException e) {
-            database.log("Error: FileNotFoundException (line 327)");
+            database.log("Error: FileNotFoundException (line 333)");
             System.out.println("The table does not exist");
             e.printStackTrace();
             return null;
@@ -350,7 +357,7 @@ public class database {
             }
             tableRawData.close();
         } catch (FileNotFoundException e) {
-            database.log("Error: FileNotFoundException (line 353)");
+            database.log("Error: FileNotFoundException (line 359)");
             System.out.println("The table does not exist");
             e.printStackTrace();
             return null;
@@ -379,14 +386,14 @@ public class database {
         }
         values.add(cmd.substring(position + 2));
         // Get column names
-        String[] columns = values.get(codePos).split(",");
-        ++codePos;
-        ArrayList<String> columnConvert = new ArrayList<String>();
-        for (int i = 0; i < columns.length; ++i) {
-            columns[i].trim();
-            columnConvert.add(columns[i]);
+        String[] column;
+        if (values.get(codePos).equals("*")) {
+            String[] temp = { "*" };
+            column = temp;
+        } else {
+            column = values.get(codePos).split(",");
         }
-        returnArray.add(columnConvert);
+        ++codePos;
 
         // Get table names
         String table = values.get(codePos);
@@ -394,6 +401,25 @@ public class database {
 
         // Get table data
         ArrayList<ArrayList<String>> tableData = database.tableValue(table);
+
+        // Set column names
+        String columns[];
+        if (column[0].equals("*")) {
+            int colLength = tableData.get(0).size();
+            String[] allCols = new String[colLength];
+            for (int i = 0; i < tableData.get(0).size(); ++i) {
+                allCols[i] = tableData.get(0).get(i);
+            }
+            columns = allCols;
+        } else {
+            columns = column;
+        }
+        ArrayList<String> columnConvert = new ArrayList<String>();
+        for (int i = 0; i < columns.length; ++i) {
+            columns[i].trim();
+            columnConvert.add(columns[i]);
+        }
+        returnArray.add(columnConvert);
 
         // Handles filters
         int filterType; // AND: 0, OR: 1, SINGLE: 2
@@ -422,7 +448,7 @@ public class database {
             // Check if valid filter
             for (int i = 0; i < filter.length; ++i) {
                 if (database.isFilterIndex(filter[i]) == -1) {
-                    database.log("Input Error: Invalid command (line 427)");
+                    database.log("Input Error: Invalid command (line 450)");
                     System.out.println("Invalid command");
                     return null;
                 }
@@ -432,7 +458,7 @@ public class database {
             for (int i = 0; i < filter.length; ++i) {
                 if (!Arrays.asList(columns)
                         .contains(filter[i].substring(0, database.isFilterIndex(filter[i])).trim())) {
-                    database.log("Input Error: Invalid command (line 437)");
+                    database.log("Input Error: Invalid command (line 460)");
                     System.out.println("Invalid command");
                     return null;
                 }
@@ -440,7 +466,6 @@ public class database {
 
             // Filtering process
             ArrayList<Integer> filteredRows = new ArrayList<Integer>();
-
             // Check which rows matches the filter
             for (int i = 0; i < filter.length; ++i) {
                 String colName = filter[i].substring(0, database.isFilterIndex(filter[i])).trim();
@@ -451,7 +476,6 @@ public class database {
                     }
                 }
             }
-
             // Count the number of times a row appears, for AND, filter by how many
             // instances of filters, for OR, more than one occurence
             ArrayList<ArrayList<String>> newTable = new ArrayList<ArrayList<String>>();
@@ -462,7 +486,7 @@ public class database {
                     newTable.add(tableData.get(i));
                 } else if (filterType == 1 && count >= 1) {
                     newTable.add(tableData.get(i));
-                } else if (filterType == 3 && count == 1) {
+                } else if (filterType == 2 && count == 1) {
                     newTable.add(tableData.get(i));
                 }
             }
@@ -478,19 +502,20 @@ public class database {
             colName = temp[0];
             try {
                 if (temp[1].equals("ASC")) {
-                    orderByType = 1;
+                    orderByType = 0;
                 } else if (temp[1].equals("DSC")) {
-                    orderByType = 2;
+                    orderByType = 1;
                 } else {
-                    database.log("Input Error: Invalid command (line 487)");
+                    database.log("Input Error: Invalid command (line 508)");
                     System.out.println("Invalid command");
                     return null;
                 }
             } catch (Exception e) {
-                database.log("Input Error: Invalid command, missing ASC/DSC (line 492)");
+                database.log("Input Error: Invalid command, missing ASC/DSC (line 513)");
                 System.out.println("Invalid command");
                 return null;
             }
+
             // Sort by order
             int colOrderIndex = tableData.get(0).indexOf(colName);
             ArrayList<String> arrangingValues = new ArrayList<String>();
@@ -499,16 +524,17 @@ public class database {
                 String addData = String.format("%s,%s", tableData.get(i).get(colOrderIndex), String.valueOf(i));
                 arrangingValues.add(addData);
             }
+            arrangingValues.remove("Empty");
             Collections.sort(arrangingValues);
             ArrayList<ArrayList<String>> newTable = new ArrayList<ArrayList<String>>();
             newTable.add(columnConvert);
-            for (int i = 1; i < arrangingValues.size(); ++i) {
+            for (int i = 0; i < arrangingValues.size(); ++i) {
                 int originalPos = Integer.parseInt(arrangingValues.get(i).split(",")[1]);
                 newTable.add(tableData.get(originalPos));
             }
-            if (orderByType == 1) {
+            if (orderByType == 0) {
                 tableData = newTable;
-            } else if (orderByType == 2) {
+            } else if (orderByType == 1) {
                 ArrayList<ArrayList<String>> anotherNewTable = new ArrayList<ArrayList<String>>();
                 anotherNewTable.add(columnConvert);
                 for (int i = newTable.size() - 1; i > 0; --i) {
@@ -538,14 +564,14 @@ public class database {
 
     private static void updateValue(String cmd) {
         if (!cmd.contains("SET") || !cmd.contains("WHERE")) {
-            database.log("Input Error: Invalid command (line 543)");
+            database.log("Input Error: Invalid command (line 566)");
             System.out.println("Invalid command");
             return;
         }
 
         String tableName = cmd.substring(cmd.indexOf("UPDATE") + 7, cmd.indexOf("SET")).trim();
         if (tableName.contains(" ")) {
-            database.log("Input Error: Invalid command (line 550)");
+            database.log("Input Error: Invalid command (line 573)");
             System.out.println("Invalid command");
             return;
         }
@@ -569,7 +595,7 @@ public class database {
             condition[i] = condition[i].trim();
             int filterIndex = database.isFilterIndex(condition[i]);
             if (filterIndex == -1) {
-                database.log("Input Error: Invalid command (line 574)");
+                database.log("Input Error: Invalid command (line 597)");
                 System.out.println("Invalid command");
                 return;
             }
@@ -579,7 +605,7 @@ public class database {
         for (int i = 0; i < replacement.length; ++i) {
             replacement[i] = replacement[i].trim();
             if (!replacement[i].contains("=")) {
-                database.log("Input Error: Invalid command (line 583)");
+                database.log("Input Error: Invalid command (line 607)");
                 System.out.println("Invalid command");
                 return;
             }
@@ -630,7 +656,7 @@ public class database {
             writer.write(replaceValue);
             writer.close();
         } catch (IOException e) {
-            database.log("Error: IOException (line 635)");
+            database.log("Error: IOException (line 658)");
             System.out.println("An unexpected error occred");
             e.printStackTrace();
         }
@@ -638,13 +664,13 @@ public class database {
 
     private static void deleteValue(String cmd) {
         if (!cmd.contains("WHERE")) {
-            database.log("Input Error: Invalid commandn (line 641)");
+            database.log("Input Error: Invalid commandn (line 666)");
             System.out.println("Invalid command");
         }
 
         String tableName = cmd.substring(cmd.indexOf("FROM") + 5, cmd.indexOf("WHERE")).trim();
         if (tableName.contains(" ")) {
-            database.log("Input Error: Invalid command (line 647)");
+            database.log("Input Error: Invalid command (line 672)");
             System.out.println("Invalid command");
             return;
         }
@@ -667,7 +693,7 @@ public class database {
             conditions[i] = conditions[i].trim();
             int filterIndex = database.isFilterIndex(conditions[i]);
             if (filterIndex == -1) {
-                database.log("Input Error: Invalid command (line 670)");
+                database.log("Input Error: Invalid command (line 695)");
                 System.out.println("Invalid command");
                 return;
             }
@@ -713,7 +739,7 @@ public class database {
             writer.write(replaceValue);
             writer.close();
         } catch (IOException e) {
-            database.log("Error: IOException (line 716)");
+            database.log("Error: IOException (line 741)");
             System.out.println("An unexpected error occred");
             e.printStackTrace();
         }
@@ -743,7 +769,7 @@ public class database {
             database.deleteValue(cmd);
             return null;
         } else {
-            database.log("Input Error: Invalid command (line 746)");
+            database.log("Input Error: Invalid command (line 771)");
             System.out.println("Invalid command.");
             return null;
         }
