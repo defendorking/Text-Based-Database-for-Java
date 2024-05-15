@@ -3,6 +3,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.io.IOException;
@@ -11,7 +14,7 @@ import java.util.Collections;
 import java.util.Scanner;
 import java.util.ArrayList;
 
-// Version 1.0.3
+// Version 1.1.0
 
 public class database {
 
@@ -27,7 +30,7 @@ public class database {
         try {
             int i = Integer.valueOf(strNum);
         } catch (NumberFormatException e) {
-            database.log("Error: NumberFormatException (line 30)");
+            database.log("Error: NumberFormatException (line 33)");
             return false;
         }
         database.log("Output: Returned true");
@@ -44,7 +47,7 @@ public class database {
         try {
             double d = Double.parseDouble(strNum);
         } catch (NumberFormatException e) {
-            database.log("Error: NumberFormatException (line 47)");
+            database.log("Error: NumberFormatException (line 50)");
             return false;
         }
         database.log("Output: Returned true");
@@ -52,7 +55,7 @@ public class database {
     }
 
     private static int isFilterIndex(String filter) {
-        database.log("Method: isFilterIndex called");
+        database.log("Method: isFilterIndex called (line 58)");
         if (filter.contains("!=")) {
             return filter.indexOf("!=");
         } else if (filter.contains(">=")) {
@@ -66,13 +69,13 @@ public class database {
         } else if (filter.contains("<")) {
             return filter.indexOf("<");
         } else {
-            database.log("Output: Filter index not found");
+            database.log("Output: Filter index not found (line 72)");
             return -1;
         }
     }
 
     private static boolean filter(String data, String filter) {
-        database.log("Method: filter called");
+        database.log("Method: filter called (line 78)");
         String temp;
         if (filter.contains("!=")) {
             temp = filter.split("!=")[1].trim();
@@ -125,7 +128,7 @@ public class database {
                 return false;
             }
         } else {
-            database.log("Output: No filter found, return false");
+            database.log("Output: No filter found, return false (line 131)");
             return false;
         }
 
@@ -153,7 +156,26 @@ public class database {
 
     // Create table in database
     private static void createTable(String name, String cmd) {
-        database.log("Method: createTable called");
+        database.log("Method: createTable called (line 159)");
+
+        // Check if table folder exists, if not, create new table folder
+
+        String folderName = "tables";
+
+        Path folderPath = Paths.get(folderName);
+
+        if (!Files.exists(folderPath)) {
+            String currentDirectory = System.getProperty("user.dir");
+            File newFolder = new File(currentDirectory, folderName);
+            boolean folderCreated = newFolder.mkdir();
+            if (!folderCreated) {
+                System.out.println("tables folder does not exist, unable to create new folder");
+                database.log("Error: Unable to create new folder (line 173)");
+            } else {
+                folderPath = Paths.get(folderName);
+            }
+        }
+
         try {
             String colName = "";
             String dataType = "";
@@ -164,7 +186,7 @@ public class database {
             for (int i = 0; i < columns.length; ++i) {
                 String[] temp = columns[i].split(" ");
                 if (colName.contains(temp[0])) {
-                    database.log("Input Error: dupliate column name (line 167)");
+                    database.log("Input Error: dupliate column name (line 189)");
                     System.out.println(String.format("The column name %s has been used multiple times.", temp[0]));
                     return;
                 } else {
@@ -175,7 +197,7 @@ public class database {
                 if (Arrays.asList(dataTypes).contains(temp[1])) {
                     dataType = dataType + temp[1] + ",";
                 } else {
-                    database.log("Input Error: Invalid datatype (line 178)");
+                    database.log("Input Error: Invalid datatype (line 200)");
                     System.out.println(String.format("%s is not a valid datatype.", temp[1]));
                     return;
                 }
@@ -195,7 +217,7 @@ public class database {
                     if (f.exists() && !f.isDirectory()) {
                         key = key + "FK(" + FKName + "),";
                     } else {
-                        database.log("Input Error: Invalid FK (line 198)");
+                        database.log("Input Error: Invalid FK (line 220)");
                         System.out.println(String.format("Invalid Foreign Key. The table %s does not exist.", FKName));
                         return;
                     }
@@ -205,20 +227,20 @@ public class database {
             }
             // Creating new files for the table
             name = name + ".txt";
-            File createFile = new File(name);
+            File createFile = new File("tables", name);
             if (createFile.createNewFile()) {
                 System.out.println("Table created: " + createFile.getName());
             } else {
-                database.log("Input Error: Table already exist (line 212)");
+                database.log("Input Error: Table already exist (line 234)");
                 System.out.println("The table already exists.");
             }
 
-            FileWriter writer = new FileWriter(name);
+            FileWriter writer = new FileWriter(String.format("tables/%s", name));
             writer.write(String.format("%s\n%s\n%s\n%s\n", colName, dataType, notNull, key));
             writer.close();
 
         } catch (IOException e) {
-            database.log("Error: IOException (line 221)");
+            database.log("Error: IOException (line 243)");
             System.out.println("An unexpected error occured.");
             e.printStackTrace();
         }
@@ -226,28 +248,31 @@ public class database {
 
     // Input values into tables
     private static void insertValue(String name, String cmd) {
-        database.log("Method: insertValue called");
+        database.log("Method: insertValue called (line 251)");
         name = name + ".txt";
         String[] columns = cmd.substring(cmd.indexOf("(") + 1, cmd.indexOf(")")).split(",");
+        for (int i = 0; i < columns.length; ++i) {
+            columns[i] = columns[i].trim();
+        }
         String[] values;
         if (cmd.contains("values")) {
             values = cmd.substring(cmd.indexOf("values") + 7, cmd.length() - 1).split("\\),\\(");
         } else {
-            database.log("Input Error: Invalid command (line 236)");
+            database.log("Input Error: Invalid command (line 261)");
             System.out.println("Invalid command.");
             return;
         }
         ArrayList<String> inputData = new ArrayList<String>();
         ArrayList<String> tableData = new ArrayList<String>();
         try {
-            File table = new File(name);
+            File table = new File(String.format("tables/%s", name));
             Scanner tableRawData = new Scanner(table);
             for (int i = 0; i < 4; ++i) {
                 tableData.add(tableRawData.nextLine());
             }
             tableRawData.close();
         } catch (FileNotFoundException e) {
-            database.log("Input Error: Table does not exist (line 250)");
+            database.log("Input Error: Table does not exist (line 275)");
             System.out.println("The table does not exist");
             e.printStackTrace();
             return;
@@ -266,7 +291,7 @@ public class database {
             for (int k = 0; k < columns.length; ++k) {
                 int posValue = colNameArrList.indexOf(columns[k]);
                 if (posValue == -1) {
-                    database.log("Input Error: Invalid column name (line 269)");
+                    database.log("Input Error: Invalid column name (line 294)");
                     System.out.println("Invalid column name");
                     return;
                 }
@@ -280,14 +305,14 @@ public class database {
                 } else if (dataType[posValue].equals("bit") && (readValue[k].equals("0") || readValue[k].equals("1"))) {
                     arrangedValue[posValue] = readValue[k];
                 } else {
-                    database.log("Input Error: Invalid datatype (line 283)");
+                    database.log("Input Error: Invalid datatype (line 308)");
                     System.out.println("Invalid datatype");
                     return;
                 }
             }
             for (int k = 0; k < arrangedValue.length; ++k) {
                 if (arrangedValue[k] == null && notNull[k].equals("Yes")) {
-                    database.log("Input Error: Null value in non null column (line 290)");
+                    database.log("Input Error: Null value in non null column (line 315)");
                     System.out.println("Null value in non null column");
                     return;
                 }
@@ -303,13 +328,13 @@ public class database {
             inputData.add(newValue);
         }
         try {
-            Writer output = new BufferedWriter(new FileWriter(name, true));
+            Writer output = new BufferedWriter(new FileWriter(String.format("tables/%s", name), true));
             for (int i = 0; i < inputData.size(); ++i) {
                 output.append(inputData.get(i) + "\n");
             }
             output.close();
         } catch (IOException e) {
-            database.log("Error: IOException (line 312)");
+            database.log("Error: IOException (line 337)");
             System.out.println("An unexpected error occured.");
             e.printStackTrace();
         }
@@ -319,19 +344,19 @@ public class database {
     // Get all values within a table in an ArrayList in ArrayList format
     // Returns: 0th column names, 1st+ table data(rows)
     private static ArrayList<ArrayList<String>> tableValue(String name) {
-        database.log("Method tableValue called");
+        database.log("Method tableValue called (line 347)");
         ArrayList<ArrayList<String>> returnData = new ArrayList<ArrayList<String>>();
         name = name + ".txt";
         ArrayList<String> tableData = new ArrayList<String>();
         try {
-            File table = new File(name);
+            File table = new File(String.format("tables/%s", name));
             Scanner tableRawData = new Scanner(table);
             while (tableRawData.hasNextLine()) {
                 tableData.add(tableRawData.nextLine());
             }
             tableRawData.close();
         } catch (FileNotFoundException e) {
-            database.log("Error: FileNotFoundException (line 334)");
+            database.log("Error: FileNotFoundException (line 359)");
             System.out.println("The table does not exist");
             e.printStackTrace();
             return null;
@@ -345,19 +370,19 @@ public class database {
     }
 
     private static ArrayList<ArrayList<String>> tableParam(String name) {
-        database.log("Method tableParam called");
+        database.log("Method tableParam called (line 373)");
         ArrayList<ArrayList<String>> returnData = new ArrayList<ArrayList<String>>();
         name = name + ".txt";
         ArrayList<String> tableData = new ArrayList<String>();
         try {
-            File table = new File(name);
+            File table = new File(String.format("tables/%s", name));
             Scanner tableRawData = new Scanner(table);
             while (tableRawData.hasNextLine()) {
                 tableData.add(tableRawData.nextLine());
             }
             tableRawData.close();
         } catch (FileNotFoundException e) {
-            database.log("Error: FileNotFoundException (line 360)");
+            database.log("Error: FileNotFoundException (line 385)");
             System.out.println("The table does not exist");
             e.printStackTrace();
             return null;
@@ -450,7 +475,7 @@ public class database {
             // Check if valid filter
             for (int i = 0; i < filter.length; ++i) {
                 if (database.isFilterIndex(filter[i]) == -1) {
-                    database.log("Input Error: Invalid command (line 453)");
+                    database.log("Input Error: Invalid command (line 478)");
                     System.out.println("Invalid command");
                     return null;
                 }
@@ -460,7 +485,7 @@ public class database {
             for (int i = 0; i < filter.length; ++i) {
                 if (!tableData.get(0)
                         .contains(filter[i].substring(0, database.isFilterIndex(filter[i])).trim())) {
-                    database.log("Input Error: Invalid command (line 463)");
+                    database.log("Input Error: Invalid command (line 488)");
                     System.out.println("Invalid command");
                     return null;
                 }
@@ -508,12 +533,12 @@ public class database {
                 } else if (temp[1].equals("DSC")) {
                     orderByType = 1;
                 } else {
-                    database.log("Input Error: Invalid command (line 511)");
+                    database.log("Input Error: Invalid command (line 536)");
                     System.out.println("Invalid command");
                     return null;
                 }
             } catch (Exception e) {
-                database.log("Input Error: Invalid command, missing ASC/DSC (line 516)");
+                database.log("Input Error: Invalid command, missing ASC/DSC (line 541)");
                 System.out.println("Invalid command");
                 return null;
             }
@@ -584,14 +609,14 @@ public class database {
 
     private static void updateValue(String cmd) {
         if (!cmd.contains("SET") || !cmd.contains("WHERE")) {
-            database.log("Input Error: Invalid command (line 587)");
+            database.log("Input Error: Invalid command (line 612)");
             System.out.println("Invalid command");
             return;
         }
 
         String tableName = cmd.substring(cmd.indexOf("UPDATE") + 7, cmd.indexOf("SET")).trim();
         if (tableName.contains(" ")) {
-            database.log("Input Error: Invalid command (line 594)");
+            database.log("Input Error: Invalid command (line 619)");
             System.out.println("Invalid command");
             return;
         }
@@ -615,7 +640,7 @@ public class database {
             condition[i] = condition[i].trim();
             int filterIndex = database.isFilterIndex(condition[i]);
             if (filterIndex == -1) {
-                database.log("Input Error: Invalid command (line 618)");
+                database.log("Input Error: Invalid command (line 643)");
                 System.out.println("Invalid command");
                 return;
             }
@@ -625,7 +650,7 @@ public class database {
         for (int i = 0; i < replacement.length; ++i) {
             replacement[i] = replacement[i].trim();
             if (!replacement[i].contains("=")) {
-                database.log("Input Error: Invalid command (line 628)");
+                database.log("Input Error: Invalid command (line 653)");
                 System.out.println("Invalid command");
                 return;
             }
@@ -672,11 +697,11 @@ public class database {
         }
         try {
             String name = tableName + ".txt";
-            FileWriter writer = new FileWriter(name);
+            FileWriter writer = new FileWriter(String.format("tables/%s", name));
             writer.write(replaceValue);
             writer.close();
         } catch (IOException e) {
-            database.log("Error: IOException (line 679)");
+            database.log("Error: IOException (line 704)");
             System.out.println("An unexpected error occred");
             e.printStackTrace();
         }
@@ -684,13 +709,13 @@ public class database {
 
     private static void deleteValue(String cmd) {
         if (!cmd.contains("WHERE")) {
-            database.log("Input Error: Invalid commandn (line 687)");
+            database.log("Input Error: Invalid commandn (line 712)");
             System.out.println("Invalid command");
         }
 
         String tableName = cmd.substring(cmd.indexOf("FROM") + 5, cmd.indexOf("WHERE")).trim();
         if (tableName.contains(" ")) {
-            database.log("Input Error: Invalid command (line 693)");
+            database.log("Input Error: Invalid command (line 718)");
             System.out.println("Invalid command");
             return;
         }
@@ -713,7 +738,7 @@ public class database {
             conditions[i] = conditions[i].trim();
             int filterIndex = database.isFilterIndex(conditions[i]);
             if (filterIndex == -1) {
-                database.log("Input Error: Invalid command (line 716)");
+                database.log("Input Error: Invalid command (line 741)");
                 System.out.println("Invalid command");
                 return;
             }
@@ -755,11 +780,11 @@ public class database {
         }
         try {
             String name = tableName + ".txt";
-            FileWriter writer = new FileWriter(name);
+            FileWriter writer = new FileWriter(String.format("tables/%s", name));
             writer.write(replaceValue);
             writer.close();
         } catch (IOException e) {
-            database.log("Error: IOException (line 762)");
+            database.log("Error: IOException (line 787)");
             System.out.println("An unexpected error occred");
             e.printStackTrace();
         }
@@ -769,7 +794,7 @@ public class database {
     public static ArrayList<ArrayList<String>> sql(String cmd) {
 
         String[] words = cmd.split(" ");
-        database.log(String.format("SQL: %s", cmd));
+        database.log(String.format("SQL: %s (line 797)", cmd));
         if (words[0].equals("CREATE") && words[1].equals("TABLE")) {
             String command = cmd.substring(cmd.indexOf("(") + 1, cmd.length() - 2);
             database.createTable(words[2].substring(0, words[2].indexOf("(")), command);
@@ -789,7 +814,7 @@ public class database {
             database.deleteValue(cmd);
             return null;
         } else {
-            database.log("Input Error: Invalid command (line 792)");
+            database.log("Input Error: Invalid command (line 817)");
             System.out.println("Invalid command.");
             return null;
         }
